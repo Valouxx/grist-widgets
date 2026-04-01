@@ -1,12 +1,27 @@
 let jsonData = null;
 const previewDiv = document.getElementById("preview");
 
+function columnsToRows(columns) {
+  const colNames = Object.keys(columns);
+  const count = columns[colNames[0]].length;
+  const rows = [];
+
+  for (let i = 0; i < count; i++) {
+    const row = {};
+    for (const col of colNames) {
+      row[col] = columns[col][i];
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
 async function update() {
   // Récupère la table connectée au widget
   const data = await grist.fetchSelectedTable();
 
   // `data` est un tableau d’objets, chaque colonne devient une clé
-  jsonData = data;
+  jsonData = columnsToRows(data);
 
   previewDiv.innerHTML = `<pre>${JSON.stringify(jsonData, null, 2)}</pre>`;
 }
