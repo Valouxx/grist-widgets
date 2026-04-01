@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <style>
+    table { border-collapse: collapse; }
+    td, th { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <table id="pivot"></table>
+
+  <script>
+    grist.ready();
+
+    grist.onRecords(function(records) {
+      const table = document.getElementById("pivot");
+      table.innerHTML = "";
+
+      let projects = new Set();
+      let dates = new Set();
+      let data = {};
+
+      records.forEach(r => {
+        let project = r.Projet;
+        let date = r.Date;
+        let hours = r.Heures;
+
+        projects.add(project);
+        dates.add(date);
+
+        if (!data[project]) data[project] = {};
+        data[project][date] = (data[project][date] || 0) + hours;
+      });
+
+      dates = Array.from(dates).sort();
+      projects = Array.from(projects);
+
+      // Header
+      let header = "<tr><th>Projet</th>";
+      dates.forEach(d => header += `<th>${d}</th>`);
+      header += "</tr>";
+      table.innerHTML += header;
+
+      // Rows
+      projects.forEach(p => {
+        let row = `<tr><td>${p}</td>`;
+        dates.forEach(d => {
+          let val = data[p][d] || "";
+          row += `<td>${val}</td>`;
+        });
+        row += "</tr>";
+        table.innerHTML += row;
+      });
+    });
+  </script>
+</body>
+</html>
