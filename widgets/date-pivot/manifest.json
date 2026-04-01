@@ -1,6 +1,6 @@
 {
   "name": "Export JSON Universel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Widget Grist exportant n'importe quelle table au format JSON",
   "author": "VRO",
   "homepage": "https://github.com/Valouxx/grist-widgets"
