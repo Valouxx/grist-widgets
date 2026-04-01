@@ -1,7 +1,7 @@
 {
   "name": "Export JSON Universel",
   "version": "1.0.1",
-  "description": "Widget Grist exportant n'importe quelle table au format JSON",
+  "description": "Widget Grist permettant de pivoter les lignes d'une table en tableau. Prévu pour saisie des heures SAP.",
   "author": "VRO",
   "homepage": "https://github.com/Valouxx/grist-widgets"
 }
