@@ -1,0 +1,18 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 15px;
+}
+
+pre {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 10px;
+  max-height: 500px;
+  overflow: auto;
+}
+
+button {
+  padding: 8px 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
