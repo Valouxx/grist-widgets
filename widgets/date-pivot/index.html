@@ -3,57 +3,89 @@
 <head>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
+    body { font-family: sans-serif; }
     table { border-collapse: collapse; }
     td, th { border: 1px solid #ccc; padding: 6px; text-align: center; }
     th { background: #eee; }
   </style>
 </head>
 <body>
+  <div id="config"></div>
   <table id="pivot"></table>
 
   <script>
-    grist.ready();
+    grist.ready({
+      columns: [
+        {name: "rowField", title: "Champ lignes", type: "Text"},
+        {name: "colField", title: "Champ colonnes", type: "Text"},
+        {name: "valField", title: "Champ valeur", type: "Numeric"}
+      ]
+    });
 
-    grist.onRecords(function(records) {
-      const table = document.getElementById("pivot");
-      table.innerHTML = "";
+    let options = {};
+    let records = [];
 
-      let projects = new Set();
-      let dates = new Set();
+    grist.onOptions(opts => {
+      options = opts;
+      render();
+    });
+
+    grist.onRecords(r => {
+      records = r;
+      render();
+    });
+
+    function render() {
+      if (!options.rowField || !options.colField || !options.valField) {
+        document.getElementById("pivot").innerHTML = "<tr><td>Configure les champs dans les options du widget</td></tr>";
+        return;
+      }
+
+      const rowField = options.rowField;
+      const colField = options.colField;
+      const valField = options.valField;
+
+      let rows = new Set();
+      let cols = new Set();
       let data = {};
 
       records.forEach(r => {
-        let project = r.Projet;
-        let date = r.Date;
-        let hours = r.Heures;
+        let row = r[rowField];
+        let col = r[colField];
+        let val = r[valField] || 0;
 
-        projects.add(project);
-        dates.add(date);
+        if (row == null || col == null) return;
 
-        if (!data[project]) data[project] = {};
-        data[project][date] = (data[project][date] || 0) + hours;
+        rows.add(row);
+        cols.add(col);
+
+        if (!data[row]) data[row] = {};
+        data[row][col] = (data[row][col] || 0) + val;
       });
 
-      dates = Array.from(dates).sort();
-      projects = Array.from(projects);
+      rows = Array.from(rows).sort();
+      cols = Array.from(cols).sort();
+
+      const table = document.getElementById("pivot");
+      table.innerHTML = "";
 
       // Header
-      let header = "<tr><th>Projet</th>";
-      dates.forEach(d => header += `<th>${d}</th>`);
+      let header = "<tr><th></th>";
+      cols.forEach(c => header += `<th>${c}</th>`);
       header += "</tr>";
       table.innerHTML += header;
 
       // Rows
-      projects.forEach(p => {
-        let row = `<tr><td>${p}</td>`;
-        dates.forEach(d => {
-          let val = data[p][d] || "";
-          row += `<td>${val}</td>`;
+      rows.forEach(r => {
+        let rowHtml = `<tr><td><b>${r}</b></td>`;
+        cols.forEach(c => {
+          let val = data[r]?.[c] ?? "";
+          rowHtml += `<td>${val}</td>`;
         });
-        row += "</tr>";
-        table.innerHTML += row;
+        rowHtml += "</tr>";
+        table.innerHTML += rowHtml;
       });
-    });
+    }
   </script>
 </body>
 </html>
