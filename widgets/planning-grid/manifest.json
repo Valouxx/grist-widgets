@@ -1,7 +1,12 @@
 {
-  "name": "Planning Grid",
-  "version": "1.0.0",
-  "description": "Widget Grist affichant un planning Projets × Jours pour le mois sélectionné",
+  "name": "Pivot Grid (Générique)",
+  "version": "1.0.1",
+  "description": "Widget Grist affichant un pivot générique configuré par l’utilisateur",
   "author": "VRO",
-  "homepage": "https://github.com/Valouxx/grist-widgets"
+  "homepage": "https://github.com/Valouxx/grist-widgets",
+  "settings": {
+    "rowField": { "type": "Column", "title": "Champ ligne" },
+    "colField": { "type": "Column", "title": "Champ colonne" },
+    "valField": { "type": "Column", "title": "Champ cellule" }
+  }
 }
