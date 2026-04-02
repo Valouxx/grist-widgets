@@ -1,46 +1,65 @@
 const statusDiv = document.getElementById("status");
 const gridDiv = document.getElementById("grid");
 
-async function update() {
-  const planning = await grist.fetchTable("Planning");
-  const params = await grist.fetchTable("Parametres");
+let settings = {};
 
-  if (!params.length) {
-    statusDiv.innerHTML = "<b>Parametres.Mois est manquant.</b>";
+function makePivot(data, rowField, colField, valField) {
+  const rows = [...new Set(data.map(r => r[rowField]))];
+  const cols = [...new Set(data.map(r => r[colField]))];
+
+  // Tri optionnel
+  rows.sort();
+  cols.sort();
+
+  const map = {};
+
+  for (const r of rows) {
+    map[r] = {};
+  }
+
+  for (const row of data) {
+    const r = row[rowField];
+    const c = row[colField];
+    const v = row[valField];
+
+    // On accepte absolument tous les types de données
+    map[r][c] = v ?? "";
+  }
+
+  return { rows, cols, map };
+}
+
+async function update() {
+  if (!settings.rowField || !settings.colField || !settings.valField) {
+    statusDiv.innerHTML = "<b>Configurez les champs dans les paramètres du widget.</b>";
+    gridDiv.innerHTML = "";
     return;
   }
 
-  const selectedMonth = new Date(params[0].Mois);
-  const year = selectedMonth.getFullYear();
-  const month = selectedMonth.getMonth();
+  const table = await grist.fetchSelectedTable();
 
-  // Jours du mois
-  const days = [];
-  const last = new Date(year, month + 1, 0).getDate();
-  for (let d = 1; d <= last; d++) days.push(d);
+  const pivot = makePivot(
+    table,
+    settings.rowField,
+    settings.colField,
+    settings.valField
+  );
 
-  // Construction map projet → jours → valeur
-  const map = {};
-  for (const row of planning) {
-    const date = new Date(row.Date);
-    if (date.getFullYear() === year && date.getMonth() === month) {
-      if (!map[row.Projet]) map[row.Projet] = {};
-      map[row.Projet][date.getDate()] = row.Valeur ?? "";
-    }
-  }
+  statusDiv.innerHTML =
+    `Ligne: <b>${settings.rowField}</b> • Colonne: <b>${settings.colField}</b> • Valeur: <b>${settings.valField}</b>`;
 
-  // Affichage statut
-  statusDiv.innerHTML = `Mois affiché : <b>${selectedMonth.toISOString().substring(0,7)}</b>`;
+  let html = "<table>";
 
-  // Construction du tableau HTML
-  let html = "<table><tr><th>Projet</th>";
-  for (const d of days) html += `<th>${d}</th>`;
+  // Ligne d’en-tête
+  html += "<tr><th>" + settings.rowField + "</th>";
+  for (const c of pivot.cols) html += `<th>${c}</th>`;
   html += "</tr>";
 
-  for (const projet of Object.keys(map).sort()) {
-    html += `<tr><th>${projet}</th>`;
-    for (const d of days) {
-      const v = map[projet][d] ?? "";
+  // Corps du tableau
+  for (const r of pivot.rows) {
+    html += `<tr><th>${r}</th>`;
+    for (const c of pivot.cols) {
+      const v = pivot.map[r][c] ?? "";
       html += `<td>${v}</td>`;
     }
     html += "</tr>";
@@ -51,9 +70,13 @@ async function update() {
 }
 
 grist.ready();
+
+// Récupérer les paramètres définis dans Grist
+grist.onSettings(s => {
+  settings = s;
+  update();
+});
+
 grist.onRecord(update);
 grist.onRecords(update);
-grist.onSettings(update);
 grist.onSelection(update);
-
-update();
