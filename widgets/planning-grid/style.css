@@ -1,0 +1,31 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 15px;
+}
+
+/* Table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 10px;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 4px 6px;
+  text-align: center;
+}
+th {
+  background: #eaeaea;
+}
+
+/* Adaptation automatique thème clair/sombre */
+@media (prefers-color-scheme: light) {
+  body { background: #ffffff !important; color: #000 !important; }
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #1e1e1e !important; color: #f0f0f0 !important; }
+  th { background: #333 !important; color: #fff !important; }
+  td { background: #2a2a2a !important; color: #fff !important; }
+}
+``
